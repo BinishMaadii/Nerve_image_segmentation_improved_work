@@ -258,3 +258,25 @@ except NameError:
 mlflow.end_run()
 print("saved run to MLflow:", RUN_NAME)
 print(f"next: run step9_diagnostics.py  (reads {OUT_DIR})")
+
+
+######### OUTPUT #####
+'''
+
+2026/10/07 12:20:20 INFO mlflow.store.db.utils: Creating initial MLflow database tables...
+2026/10/07 12:20:20 INFO mlflow.store.db.utils: Updating database tables
+2026/10/07 12:20:22 INFO mlflow.tracking.fluent: Experiment with name 'nerve_segmentation' does not exist. Creating a new experiment.
+saved the cache outputs/data_cache.npz
+5635 frames, 47 patients, nerve in 41% of frames
+dev: 4436 frames, 37 patients   test: 1199 frames, 10 patients
+  fold 1/5: trained on 3596 frames, last epoch train loss 1.0873, held-out loss 1.3228
+  fold 2/5: trained on 3596 frames, last epoch train loss 0.9469, held-out loss 1.1923
+  fold 3/5: trained on 3596 frames, last epoch train loss 0.9794, held-out loss 1.1261
+  fold 4/5: trained on 3478 frames, last epoch train loss 0.9733, held-out loss 1.2880
+  fold 5/5: trained on 3478 frames, last epoch train loss 0.9875, held-out loss 1.0270
+trained 5 models in 357 s
+saved 5 state_dicts and 5 TorchScript models (reloaded outputs match to 1e-4)
+saved run to MLflow: step8_train
+next: run step9_diagnostics.py  (reads outputs)
+
+'''
