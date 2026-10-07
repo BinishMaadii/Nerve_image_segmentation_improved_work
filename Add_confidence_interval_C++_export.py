@@ -421,3 +421,76 @@ except NameError:
     pass                                # in a notebook there is no file to copy
 mlflow.end_run()
 print("saved run to MLflow:", RUN_NAME)
+
+
+
+######### output #####
+'''
+5635 frames, 47 patients, nerve in 41% of frames
+dev: 4436 frames, 37 patients   test: 1199 frames, 10 patients
+  fold 1/5: trained on 3596 frames, last epoch loss 1.0726
+  fold 2/5: trained on 3596 frames, last epoch loss 0.9414
+  fold 3/5: trained on 3596 frames, last epoch loss 0.9160
+  fold 4/5: trained on 3478 frames, last epoch loss 0.9898
+  fold 5/5: trained on 3478 frames, last epoch loss 1.0014
+trained 5 models in 334 s
+chosen pres_thr  = 0.5   (out-of-fold balanced score 0.556)
+chosen pix_thr   = 0.4   (out-of-fold balanced score 0.574)
+chosen min_area  = 200   (out-of-fold balanced score 0.593)
+
+--- test results ---
+always empty:        balanced 0.500   Dice all 0.494
+one model, no flip   balanced 0.612   Dice all 0.609   nerve frames 0.370   found 52%   empty kept empty 85%
+one model, flip      balanced 0.573   Dice all 0.568   nerve frames 0.229   found 32%   empty kept empty 92%
+5 models, no flip    balanced 0.652   Dice all 0.649   nerve frames 0.430   found 57%   empty kept empty 87%
+5 models, flip       balanced 0.594   Dice all 0.590   nerve frames 0.241   found 31%   empty kept empty 95%
+
+final pipeline (5 models, flip), 95% interval over test patients:
+    nerve_dice  0.241   [0.106, 0.362]
+    balanced    0.594   [0.534, 0.650]
+
+final pipeline minus always empty:
+    nerve_dice  gain +0.241   [+0.106, +0.362]   BETTER
+    balanced    gain +0.094   [+0.034, +0.150]   BETTER
+
+final pipeline minus one model without flip:
+    nerve_dice  gain -0.001   [-0.136, +0.125]   INCONCLUSIVE
+    balanced    gain +0.081   [+0.003, +0.167]   BETTER
+
+exported 5 TorchScript models (reloaded outputs match to 1e-4)
+saved nerve_unet_config.json and the reference files
+saved run to MLflow: step7_ci_and_export5635 frames, 47 patients, nerve in 41% of frames
+dev: 4436 frames, 37 patients   test: 1199 frames, 10 patients
+  fold 1/5: trained on 3596 frames, last epoch loss 1.0726
+  fold 2/5: trained on 3596 frames, last epoch loss 0.9414
+  fold 3/5: trained on 3596 frames, last epoch loss 0.9160
+  fold 4/5: trained on 3478 frames, last epoch loss 0.9898
+  fold 5/5: trained on 3478 frames, last epoch loss 1.0014
+trained 5 models in 334 s
+chosen pres_thr  = 0.5   (out-of-fold balanced score 0.556)
+chosen pix_thr   = 0.4   (out-of-fold balanced score 0.574)
+chosen min_area  = 200   (out-of-fold balanced score 0.593)
+
+--- test results ---
+always empty:        balanced 0.500   Dice all 0.494
+one model, no flip   balanced 0.612   Dice all 0.609   nerve frames 0.370   found 52%   empty kept empty 85%
+one model, flip      balanced 0.573   Dice all 0.568   nerve frames 0.229   found 32%   empty kept empty 92%
+5 models, no flip    balanced 0.652   Dice all 0.649   nerve frames 0.430   found 57%   empty kept empty 87%
+5 models, flip       balanced 0.594   Dice all 0.590   nerve frames 0.241   found 31%   empty kept empty 95%
+
+final pipeline (5 models, flip), 95% interval over test patients:
+    nerve_dice  0.241   [0.106, 0.362]
+    balanced    0.594   [0.534, 0.650]
+
+final pipeline minus always empty:
+    nerve_dice  gain +0.241   [+0.106, +0.362]   BETTER
+    balanced    gain +0.094   [+0.034, +0.150]   BETTER
+
+final pipeline minus one model without flip:
+    nerve_dice  gain -0.001   [-0.136, +0.125]   INCONCLUSIVE
+    balanced    gain +0.081   [+0.003, +0.167]   BETTER
+
+exported 5 TorchScript models (reloaded outputs match to 1e-4)
+saved nerve_unet_config.json and the reference files
+saved run to MLflow: step7_ci_and_export
+'''
