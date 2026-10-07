@@ -314,3 +314,86 @@ except NameError:
     pass                                # in a notebook there is no file to copy
 mlflow.end_run()
 print("saved run to MLflow:", RUN_NAME)
+
+
+
+########## ouputs#####
+'''
+
+
+##### Step 6: flip averaging, cross-validation and an ensemble of 5 models
+
+##### 8. Test results
+# The test patients are used once. Four versions are compared, with the same thresholds:
+#   one model without flip, one model with flip, 5 models without flip, 5 models with flip.
+# "One model" is the average over the 5 single models.
+
+test_true = Y[test_idx] > 0.5
+test_has = has_nerve[test_idx]
+always_empty = (~test_has).mean()
+
+def report(seg_probs, pres_probs):
+    pred_masks = make_masks(seg_probs, pres_probs, **POST)
+    d = frame_dice(pred_masks, test_true)
+    found = pred_masks.any(axis=(1, 2))
+    return {"dice_all": d.mean(),
+            "dice_nerve_frames": d[test_has].mean(),
+            "nerve_found": found[test_has].mean(),
+            "empty_kept_empty": (~found[~test_has]).mean(),
+            "balanced": balanced_score(d, test_has)}
+
+def mean_of_reports(reports):
+    return {key: np.mean([r[key] for r in reports]) for key in reports[0]}
+
+results = {
+    "one model, no flip":  mean_of_reports([report(s, p) for s, p in test_plain]),
+    "one model, flip":     mean_of_reports([report(s, p) for s, p in test_flip]),
+    "5 models, no flip":   report(*average_models(test_plain)),
+    "5 models, flip":      report(*average_models(test_flip)),
+}
+
+print("\n--- test results ---")
+print(f"always empty:        balanced 0.500   Dice all {always_empty:.3f}")
+for name, m in results.items():
+    print(f"{name:19s}  balanced {m['balanced']:.3f}   Dice all {m['dice_all']:.3f}   nerve frames {m['dice_nerve_frames']:.3f}   "
+          f"found {m['nerve_found']:.0%}   empty kept empty {m['empty_kept_empty']:.0%}")
+
+
+##### 9. Save the results in MLflow
+# Same metric names in every step, so the runs line up in one table.
+# The saved numbers are the final pipeline: 5 models with flip averaging.
+
+final = results["5 models, flip"]
+mlflow.log_params({"tuned_pres_thr": best["pres_thr"], "tuned_pix_thr": best["pix_thr"],
+                   "tuned_min_area": best["min_area"]})
+for name, value in final.items():
+    mlflow.log_metric(name, float(value))
+mlflow.log_metric("always_empty_dice", float(always_empty))
+mlflow.log_metric("single_model_balanced", float(results["one model, no flip"]["balanced"]))
+try:
+    mlflow.log_artifact(__file__)       # saves a copy of this code with the run
+except NameError:
+    pass                                # in a notebook there is no file to copy
+mlflow.end_run()
+print("saved run to MLflow:", RUN_NAME)
+5635 frames, 47 patients, nerve in 41% of frames
+dev: 4436 frames, 37 patients   test: 1199 frames, 10 patients
+  fold 1/5: trained on 3596 frames, last epoch loss 1.0656
+  fold 2/5: trained on 3596 frames, last epoch loss 1.0367
+  fold 3/5: trained on 3596 frames, last epoch loss 0.9197
+  fold 4/5: trained on 3478 frames, last epoch loss 1.0763
+  fold 5/5: trained on 3478 frames, last epoch loss 1.0422
+trained 5 models in 332 s
+chosen pres_thr  = 0.8   (out-of-fold balanced score 0.500)
+chosen pix_thr   = 0.4   (out-of-fold balanced score 0.502)
+chosen min_area  = 0   (out-of-fold balanced score 0.502)
+
+--- test results ---
+always empty:        balanced 0.500   Dice all 0.494
+one model, no flip   balanced 0.516   Dice all 0.510   nerve frames 0.044   found 6%   empty kept empty 99%
+one model, flip      balanced 0.502   Dice all 0.495   nerve frames 0.003   found 1%   empty kept empty 100%
+5 models, no flip    balanced 0.502   Dice all 0.496   nerve frames 0.004   found 0%   empty kept empty 100%
+5 models, flip       balanced 0.500   Dice all 0.494   nerve frames 0.000   found 0%   empty kept empty 100%
+saved run to MLflow: step6_flip_cv_ensemble
+
+'''
